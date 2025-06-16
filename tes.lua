@@ -231,7 +231,7 @@ function SendWebhook2()
   if not WebhookPNB2 then return end
   
   local currentTime = os.time()
-  if currentTime - LastWebhook2Time < 600 then return end -- 10 minutes = 600 seconds
+  if currentTime - LastWebhook2Time < 300 then return end -- 5 minutes = 300 seconds
   
   LastWebhook2Time = currentTime
   
@@ -247,7 +247,7 @@ function SendWebhook2()
   
   local Payload2 = [[
 {"embeds": [{
-"author": {"name": "PNB LOGS #ExsorsCPS",
+"author": {"name": "PNB LOGS #REBANA",
 "icon_url": "https://cdn.discordapp.com/attachments/1349225845402894339/1380592004693622857/AAAAA.gif?ex=68466a40&is=684518c0&hm=394c453dd6c593ac3b744ec4bda1d0604e2d4d408e6e3243e8eab022c86fbe3d&"},
 "fields": [{"name": "<:AchievementSprites:1373112887203069972> Account",
 "value": "]] .. Nick .. [[
@@ -467,7 +467,7 @@ end
 
 function SendInfoPNB()
   local currentTime = os.time()
-  if currentTime - LastWebhookTime < 600 then return end -- 10 minutes = 600 seconds
+  if currentTime - LastWebhookTime < 300 then return end -- 5 minutes = 300 seconds
   LastWebhookTime = currentTime
 
   math.randomseed(os.time())
@@ -548,7 +548,7 @@ buttonClicked|bgem_suckall
 function Overlay(text)
   local var = {}
   var[0] = "OnTextOverlay"
-  var[1] = "`w[`p@ExsorsCPS`w] `9" .. text
+  var[1] = "`w[`p@Rebana`w] `9" .. text
   SendVariantList(var)
 end
 
