@@ -1,6 +1,6 @@
 -- [Second Webhook - 5 minute intervals]
-WebhookPNB2 = false
-WebhookLink2 = ""
+WebhookPNB2 = true
+WebhookLink2 = "https://discordapp.com/api/webhooks/1384078461521363005/N_g7KRXC4Mcvd91KHq3alh247EJV56EITp7uv4fqoOyf0jJj8lA7agpq7ggnGkvbsdWW"
 
 -- =========================
 --   END CONFIGURATION     --
