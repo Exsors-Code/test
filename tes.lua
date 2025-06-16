@@ -230,7 +230,7 @@ function SendWebhook2()
   if not WebhookPNB2 then return end
   
   local currentTime = os.time()
-  if currentTime - LastWebhook2Time < 6000 then return end -- 10 minutes = 6000 seconds
+  if currentTime - LastWebhook2Time < 600 then return end -- 10 minutes = 600 seconds
   
   LastWebhook2Time = currentTime
   
@@ -466,7 +466,7 @@ end
 
 function SendInfoPNB()
   local currentTime = os.time()
-  if currentTime - LastWebhookTime < 6000 then return end -- 10 minutes = 6000 seconds
+  if currentTime - LastWebhookTime < 600 then return end -- 10 minutes = 600 seconds
   LastWebhookTime = currentTime
 
   math.randomseed(os.time())
