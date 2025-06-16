@@ -1,6 +1,6 @@
 -- [Second Webhook - 5 minute intervals]
 WebhookPNB2 = false
-WebhookLink2 = "https://discordapp.com/api/webhooks/1384078461521363005/N_g7KRXC4Mcvd91KHq3alh247EJV56EITp7uv4fqoOyf0jJj8lA7agpq7ggnGkvbsdWW"
+WebhookLink2 = "https://discord.com/api/webhooks/1383886557525835806/fAjQwl4awVlIl99LpnmNuO7y65su2E53VztkezUNCjnJJ81KzAw_WGZJBvr1FPoATbSP"
 
 -- =========================
 --   END CONFIGURATION     --
@@ -36,6 +36,9 @@ DBlock = false
 Ghost = false
 MagW = false
 Speed = 0
+ConsumeArroz = false
+ConsumeClover = false
+ConsumeSongpyeon = false
 IsConsuming = false
 LastWebhook2Time = 0
 LastWebhookTime = 0 -- Added to track first webhook last send time
@@ -48,6 +51,23 @@ function inv(id)
     end
   end
   return 0
+end
+
+local function wrenchMe()
+    if GetWorld() == nil then
+        Sleep(delayReconnect)
+        RequestJoinWorld(worldName)
+        Sleep(delayReconnect)
+        nowFarm = false
+    else
+        if GetWorld() == nil then
+            Sleep(delayReconnect)
+            nowFarm = false
+            return
+        end
+        SendPacket(2, "action|wrench\n|netid|".. GetLocal().netid)
+        Sleep(300)
+    end
 end
 
 adjustedSitX, adjustedSitY = SitX, SitY
@@ -65,44 +85,25 @@ end
 
 AddHook("onvariant", "mommy", function(var)
     if var[0] == "OnDialogRequest" and var[1]:find("add_player_info") then
+        print("[DEBUG] OnDialogRequest add_player_info: ", var[1])
         if var[1]:find("|528|") then
-            consumeClover = true
+            ConsumeClover = true
+            ConsumeSongpyeon = true
         else
-            consumeClover = false
+            ConsumeClover = false
+            ConsumeSongpyeon = false
         end
 
         if var[1]:find("|4604|") then
-            consumeArroz = true
+            ConsumeArroz = true
         else
-            consumeArroz = false
-        end
-
-        if var[1]:find("|1056|") then
-            consumeSongpyeon = true
-        else
-            consumeSongpyeon = false
+            ConsumeArroz = false
         end
         return true
     end
     return false
 end)
 
--- Function to adjust SitX and SitY based on Mode
-function AdjustSitCoordinates()
-  if Mode == "mneck" then
-    adjustedSitX = SitX + 1
-    adjustedSitY = SitY
-  elseif Mode == "vertical" then
-    adjustedSitX = SitX - 1
-    adjustedSitY = SitY
-  elseif Mode == "horizontal" then
-    adjustedSitX = SitX - 1
-    adjustedSitY = SitY - 1
-  else
-    adjustedSitX = SitX
-    adjustedSitY = SitY
-  end
-end
 
 function obj(id)
   local total = 0
@@ -528,75 +529,6 @@ function SendInfoPNB()
   SendWebhook(WebhookLink, Payload)
 end
 
-function CheckBuffActive(buffId)
-  if buffId == 528 then
-    return consumeClover == true
-  elseif buffId == 4604 then
-    return consumeArroz == true
-  elseif buffId == 1056 then
-    return consumeSongpyeon == true
-  else
-    return false
-  end
-end
-
-local consumedFlags = {
-  [528] = false,
-  [4604] = false,
-  [1056] = false,
-}
-
-function Consumes()
-  if not GetRemote then 
-    IsConsuming = false
-    return 
-  end
-
-  if UseSongpyeon and Songpyeon > 0 and not CheckBuffActive(1056) and not consumedFlags[1056] then
-    IsConsuming = true
-    consumedFlags[1056] = true
-    local x, y = getSitXYForConsume()
-    SendPacketRaw(false, {
-      type = 3,
-      value = 1056,
-      px = x,
-      py = y,
-      x = x * 32,
-      y = y * 32
-    })
-    Sleep(200)
-    return
-  elseif UseClover and Clover > 0 and not CheckBuffActive(528) and not consumedFlags[528] then
-    IsConsuming = true
-    consumedFlags[528] = true
-    local x, y = getSitXYForConsume()
-    SendPacketRaw(false, {
-      type = 3,
-      value = 528,
-      px = x,
-      py = y,
-      x = x * 32,
-      y = y * 32
-    })
-    Sleep(200)
-    return
-  elseif UseArroz and Arroz > 0 and not CheckBuffActive(4604) and not consumedFlags[4604] then
-    IsConsuming = true
-    consumedFlags[4604] = true
-    local x, y = getSitXYForConsume()
-    SendPacketRaw(false, {
-      type = 3,
-      value = 4604,
-      px = x,
-      py = y,
-      x = x * 32,
-      y = y * 32
-    })
-    Sleep(200)
-    return
-  end
-
-  IsConsuming = false
 
   if WebhookPNB then
     SendInfoPNB()
@@ -612,7 +544,6 @@ buttonClicked|bgem_suckall
       Sleep(250)
     end
   end
-end
 
 function Overlay(text)
   local var = {}
@@ -661,7 +592,8 @@ action|input
 |text|/modage 30]])
       Sleep(1000)
     end
-    function AutoConvertDLCheck()
+
+function AutoConvertDLCheck()
       if AutoConvertDL and not IsConsuming then
         -- Update inventory values
         BGL = inv(7188) or 0
@@ -707,9 +639,63 @@ buttonClicked|bglconvert]])
       end
     end
 
+
     while true do
-      Sleep(250) -- Add a small delay to prevent high CPU usage
-      Consumes()
+      Sleep(250)
+                      wrenchMe()
+                      if not ConsumeArroz then
+                    Sleep(100)
+                    for i = 1, 1 do
+                        if AutoArroz then
+                                local x, y = getSitXYForConsume()
+    SendPacketRaw(false, {
+      type = 3,
+      value = 4604,
+      px = x,
+      py = y,
+      x = x * 32,
+      y = y * 32
+    })
+                            break
+                        end
+                    end
+                end
+                                      wrenchMe()
+                                      if not ConsumeClover then
+                    Sleep(100)
+                    for i = 1, 1 do
+                        if AutoClover then
+                                local x, y = getSitXYForConsume()
+    SendPacketRaw(false, {
+      type = 3,
+      value = 528,
+      px = x,
+      py = y,
+      x = x * 32,
+      y = y * 32
+    })
+                            break
+                        end
+                    end
+                end
+                                      wrenchMe()
+                                      if not ConsumeSongpyeon then
+                    Sleep(100)
+                    for i = 1, 1 do
+                        if AutoSongpyeon then
+                                local x, y = getSitXYForConsume()
+    SendPacketRaw(false, {
+      type = 3,
+      value = 1056,
+      px = x,
+      py = y,
+      x = x * 32,
+      y = y * 32
+    })
+                            break
+                        end
+                    end
+                end
       Sleep(250) -- Add a small delay to prevent high CPU usage
       AutoConvertDLCheck()
       Sleep(250) -- Add a small delay to prevent high CPU usage
