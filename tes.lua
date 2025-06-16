@@ -1,3 +1,7 @@
+-- [Second Webhook - 5 minute intervals]
+WebhookPNB2 = false
+WebhookLink2 = ""
+
 -- =========================
 --   END CONFIGURATION     --
 -- =========================
@@ -33,6 +37,7 @@ Ghost = false
 MagW = false
 Speed = 0
 IsConsuming = false
+LastWebhook2Time = 0
 LastWebhookTime = 0 -- Added to track first webhook last send time
 RemoveHooks()
 
@@ -220,6 +225,14 @@ function SendWebhook(url, data)
     ["Content-Type"] = "application/json"
   }, data)
 end
+
+function SendWebhook2()
+  if not WebhookPNB2 then return end
+  
+  local currentTime = os.time()
+  if currentTime - LastWebhook2Time < 300 then return end -- 5 minutes = 300 seconds
+  
+  LastWebhook2Time = currentTime
   
   -- Update current values
   PGems = pcall(obj) and obj(PinkGems) or PGems
@@ -230,6 +243,43 @@ end
   BLK = pcall(inv) and inv(11550) or BLK
   BGL = pcall(inv) and inv(7188) or BGL
   DL = pcall(inv) and inv(1796) or DL
+  
+  local Payload2 = [[
+{"embeds": [{
+"author": {"name": "PNB LOGS #REBANA",
+"icon_url": "https://cdn.discordapp.com/attachments/1349225845402894339/1380592004693622857/AAAAA.gif?ex=68466a40&is=684518c0&hm=394c453dd6c593ac3b744ec4bda1d0604e2d4d408e6e3243e8eab022c86fbe3d&"},
+"fields": [{"name": "<:AchievementSprites:1373112887203069972> Account",
+"value": "]] .. Nick .. [[
+",
+"inline": true},
+{"name": "<:growglobe:1382535597087785071> World",
+"value": "]] .. WorldName .. [[
+",
+"inline": true},
+{"name": "<:magplant:1368981774138605668> Magplant",
+"value": "]] .. Now .. " of " .. #Mag .. [[
+",
+"inline": true},
+{"name": "<:award:1373113752127537193> Consumables",
+"value": "]] .. Songpyeon .. " <:songpyeon:1368980154579157174> " .. Clover .. " <:clover:1368979672083464395> " .. Arroz .. [[
+ <:arroz:1368979942007902238>",
+"inline": true},
+{"name": "<:fwl:1373113385016758363> Total Locks",
+"value": "]] .. BLK .. " <a:irengb:1381540201955852359>  " .. BGL .. " <a:bglb:1381540210206314566>  " .. DL .. [[
+ <a:dlb:1381540213071024228>",
+"inline": true},
+{"name": "<:gemz:1382534859343401031> Gems Drop",
+"value": "]] .. FNum(BGems) .. "**<:blackgems:1376711562827534448>** " .. FNum(PGems) .. [[
+**<:pinkgems:1376711581383131157>**",
+"inline": true}],
+"footer": {"text": "Total PNB Time : ]] .. FTime(os.time() - StartTime) .. [[
+"},
+"color": ]] .. math.random(0, 16777215) .. [[
+}]
+}]]
+  
+  SendWebhook(WebhookLink2, Payload2)
+end
 
 function onvariant(var)
   if "OnSDBroadcast" == var[0] then
@@ -576,22 +626,22 @@ if os or not WebhookPNB then
     Overlay("`7Please Set Magplant Background")
   else
     Overlay("`2Script is working!")
-    Sleep(750)
+    Sleep(1000)
     AddHook("onvariant", "onvariant", onvariant)
-    Sleep(750)
+    Sleep(1000)
     if HideAnimation then
       AddHook("onprocesstankupdatepacket", "OnIncomingRawPacket", function(pkt)
         if 3 == pkt.type or 8 == pkt.type or 14 == pkt.type or 17 == pkt.type then
           return true
         end
       end)
-      Sleep(750)
+      Sleep(1000)
     end
     if not RoleMVP then
       SendPacket(2, [[
 action|input
 |text|/radio]])
-      Sleep(750)
+      Sleep(1000)
     end
     SendPacket(2, [[
 action|dialog_return
@@ -604,12 +654,12 @@ check_lonely|]] .. CheckIgnore .. [[
 check_ignoreo|]] .. CheckIgnore .. [[
 
 check_ignoref|]] .. CheckIgnore)
-    Sleep(750)
+    Sleep(1000)
     if RoleMVP or RoleMOD then
       SendPacket(2, [[
 action|input
 |text|/modage 30]])
-      Sleep(750)
+      Sleep(1000)
     end
     function AutoConvertDLCheck()
       if AutoConvertDL and not IsConsuming then
@@ -629,7 +679,7 @@ x|]] .. (TelX - 1) .. [[
 y|]] .. (TelY - 1) .. [[
 |
 buttonClicked|dlconvert]])
-          Sleep(500)
+          Sleep(700)
         end
         
         -- Trigger 2: make_bgl - when there are 100+ BGL in inventory
@@ -638,7 +688,7 @@ buttonClicked|dlconvert]])
 action|dialog_return
 dialog_name|info_box
 buttonClicked|make_bgl]])
-          Sleep(500)
+          Sleep(700)
         end
         
         -- Trigger 3: bglconvert - when there are 100+ DL in inventory
@@ -652,7 +702,7 @@ x|]] .. (TelX - 1) .. [[
 y|]] .. (TelY - 1) .. [[
 |
 buttonClicked|bglconvert]])
-          Sleep(500)
+          Sleep(700)
         end
       end
     end
@@ -663,7 +713,7 @@ buttonClicked|bglconvert]])
       Sleep(250) -- Add a small delay to prevent high CPU usage
       AutoConvertDLCheck()
       Sleep(250) -- Add a small delay to prevent high CPU usage
-      SendWebhook() -- Send second webhook every 5 minutes
+      SendWebhook2() -- Send second webhook every 5 minutes
       Sleep(250) -- Add a small delay to prevent high CPU usage
     end
   end
